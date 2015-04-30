@@ -34,7 +34,7 @@ public class Client  {
 	 * Constructor call when used from a GUI
 	 * in console mode the ClienGUI parameter is null
 	 */
-	Client(String server, int port, String username) {
+	public Client(String server, int port, String username) {
 		this.server = server;
 		this.port = port;
 		this.username = username;
