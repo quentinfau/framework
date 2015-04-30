@@ -194,8 +194,8 @@ public class Server {
 		ObjectOutputStream sOutput;
 		// my unique id (easier for deconnection)
 		int id;
-		// the Username of the Client
-		String username;
+		// the login of the Client
+		String login, password;
 		// the only type of message a will receive
 		ChatMessage cm;
 		// the date I connect
@@ -214,32 +214,43 @@ public class Server {
 				sOutput = new ObjectOutputStream(socket.getOutputStream());
 				sInput  = new ObjectInputStream(socket.getInputStream());
 				// read the username
-				username = (String) sInput.readObject();
-				System.out.println(username + " just connected.");
+				login = (String) sInput.readObject();
+				password = (String) sInput.readObject();
 				
-				int choix = (int) sInput.readObject();				//Recois le choix de l'utilisateur (upload un fichier ou download un fichier)
-				switch (choix) {
-				case 0 :											//cas upload
-					int tailleFichier = (int) sInput.readObject();
-					System.out.println(tailleFichier);
-					String nomFichier = (String) sInput.readObject();
-					System.out.println(nomFichier);
+				if (!authentification(login, password)){
+					System.out.println("auth echoué");
+					sOutput.writeObject(false);
+					close();
+					remove(id);
 					
-					receiveFile(socket, tailleFichier, nomFichier);
-					break;
-				case 1 : 											//cas download
-					System.out.println("download");
-					sOutput.writeObject(listerFichier());
-					File fichier = (File) sInput.readObject();
-					/*System.out.println(fichier.getName());
-					
-					sOutput.writeObject((int) fichier.length());
-					sOutput.writeObject(fichier.getName());*/
-					
-					sendFileToClient(socket, fichier);
-				default:
-					break;
 				}
+				else{
+					
+					System.out.println("auth reussi");
+					sOutput.writeObject(true);
+					System.out.println(login + " just connected.");
+					
+					int choix = (int) sInput.readObject();				//Recois le choix de l'utilisateur (upload un fichier ou download un fichier)
+					switch (choix) {
+					case 0 :											//cas upload
+						int tailleFichier = (int) sInput.readObject();
+						System.out.println(tailleFichier);
+						String nomFichier = (String) sInput.readObject();
+						System.out.println(nomFichier);
+						
+						receiveFile(socket, tailleFichier, nomFichier);
+						break;
+					case 1 : 											//cas download
+						System.out.println("download");
+						sOutput.writeObject(listerFichier());
+						File fichier = (File) sInput.readObject();
+						
+						sendFileToClient(socket, fichier);
+					default:
+						break;
+					}
+				}
+				
 				System.out.println("close");
 				close();
 				
@@ -257,7 +268,6 @@ public class Server {
 		private void close() {
 			// try to close the connection
 			try {
-				System.out.println("sOutpu closed");
 				if(sOutput != null) sOutput.close();
 			}
 			catch(Exception e) {}
@@ -269,6 +279,17 @@ public class Server {
 				if(socket != null) socket.close();
 			}
 			catch (Exception e) {}
+		}
+		
+		private boolean authentification(String login, String password){
+			
+			Utilisateurs user = new Utilisateurs();
+			if (user.authentification(login, password)){
+				return true;
+			}
+			else{
+				return false;
+			}				
 		}
 		
 		private boolean writeMsg(String msg) {
@@ -284,7 +305,7 @@ public class Server {
 			}
 			// if an error occurs, do not abort just inform the user
 			catch(IOException e) {
-				System.out.println("Error sending message to " + username);
+				System.out.println("Error sending message to " + login);
 				System.out.println(e.toString());
 			}
 			return true;

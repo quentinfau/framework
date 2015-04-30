@@ -19,25 +19,26 @@ public class Client  {
 
 	// if I use a GUI or not
 
-	// the server, the port and the username
-	private String server, username;
+	// the server, the port and the login
+	private String server, login, password;
 	private int port;
 
 	/*
 	 *  Constructor called by console mode
 	 *  server: the server address
 	 *  port: the port number
-	 *  username: the username
+	 *  login: the login
 	 */
 
 	/*
 	 * Constructor call when used from a GUI
 	 * in console mode the ClienGUI parameter is null
 	 */
-	Client(String server, int port, String username) {
+	Client(String server, int port, String login, String password) {
 		this.server = server;
 		this.port = port;
-		this.username = username;
+		this.login = login;
+		this.password = password;
 		// save if we are in GUI mode or not
 	}
 
@@ -71,24 +72,41 @@ public class Client  {
 
 		// creates the Thread to listen from the server 
 		//new ListenFromServer().start();
-		// Send our username to the server this is the only message that we
+		// Send our login to the server this is the only message that we
 		// will send as a String. All other messages will be ChatMessage objects
-		try
+		
+		if (!(authentification(login, password)))
 		{
-			sOutput.writeObject(username);
-		}
-		catch (IOException eIO) {
-			System.out.println("Exception doing login : " + eIO);
+			System.out.println("Erreur lors de la connexion ,mdp ou login incorrect");
 			disconnect();
 			return false;
+		}
+		else{
+			System.out.println("Authentification réussi");
+			return true;
 		}
 		// success we inform the caller that it worked 
 		//E:\Musique\Pink Floyd\Meddle\Echoes - Pink Floyd.mp3
 		//E:\Musique\Pink Floyd\Meddle\One Of These Days - Pink Floyd.mp3
 		//C:\Users\Quentin\Documents\test.jpg
-		return true;
+		
 	}
 
+	private boolean authentification(String login, String password){
+		
+		try {
+			sOutput.writeObject(login);
+			sOutput.writeObject(password);
+			return (boolean) (sInput.readObject());
+		} catch (IOException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		return false;
+		
+	}
 	void sendMessage(ChatMessage msg) {
 		try {
 			sOutput.writeObject(msg);
@@ -232,13 +250,13 @@ public class Client  {
 	/*
 	 * To start the Client in console mode use one of the following command
 	 * > java Client
-	 * > java Client username
-	 * > java Client username portNumber
-	 * > java Client username portNumber serverAddress
+	 * > java Client login
+	 * > java Client login portNumber
+	 * > java Client login portNumber serverAddress
 	 * at the console prompt
 	 * If the portNumber is not specified 1500 is used
 	 * If the serverAddress is not specified "localHost" is used
-	 * If the username is not specified "Anonymous" is used
+	 * If the login is not specified "Anonymous" is used
 	 * > java Client 
 	 * is equivalent to
 	 * > java Client Anonymous 1500 localhost 
@@ -252,10 +270,10 @@ public class Client  {
 		int portNumber = 53786;
 		String serverAddress = InetAddress.getLocalHost().getHostAddress(); 
 		System.out.println(serverAddress);
-		String userName = "Anonymous";
-
+		String login = "login1";
+		String password = "password1";
 		// create the Client object
-		Client client = new Client(serverAddress, portNumber, userName);
+		Client client = new Client(serverAddress, portNumber, login, password);
 		// test if we can start the connection to the Server
 		// if it failed nothing we can do
 		if(!client.start())
