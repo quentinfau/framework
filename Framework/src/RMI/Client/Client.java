@@ -14,13 +14,15 @@ import java.rmi.registry.Registry;
 import java.util.Enumeration;
 import java.util.LinkedList;
 
+import RMI.Server.ChatInterface;
+
 
 
 public class Client implements ClientInterface, Serializable {
 	private String nom;
 	private String serveur="130.190.29.49";
-	//private ChatInterface chat;
-	private Remote chat;
+	private ChatInterface chat;
+	//private Remote chat;
 	
 	public Client(){
 		try {
@@ -59,7 +61,7 @@ public class Client implements ClientInterface, Serializable {
             Registry registry = LocateRegistry.getRegistry(serveur,1090);
             
 			//chat = (ChatInterface) registry.lookup(serveur+"/Chat");
-			chat = registry.lookup(serveur);
+			chat =(ChatInterface) registry.lookup(serveur);
 			System.out.println("USER ADD");
 			
 			//chat.addUser(nom,this);
