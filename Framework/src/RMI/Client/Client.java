@@ -13,6 +13,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.LinkedList;
 
 import RMI.Server.ChatInterface;
@@ -21,10 +22,14 @@ import RMI.Server.ChatInterface;
 
 public class Client implements ClientInterface, Serializable {
 	private String nom;
-	private String serveur= "130.190.31.78";
+	private String serveur= "172.16.40.240";
 	private ChatInterface chat;
+	private String sender;
+	private String msg;
+	//private String msg;
 	//private Remote chat;
-	
+	//private String sender;
+	private Hashtable<String, String> Histo;
 	public Client(){
 		try {
 			//this.nom=name;
@@ -41,12 +46,17 @@ public class Client implements ClientInterface, Serializable {
 	
 	
 	/* RECEIVE */
-	public synchronized void  receive(String sender, String msg) {
-		System.out.println(sender+" : "+msg);			
+	public synchronized void receive (String sender, String msg) {
+		System.out.println(sender+" : "+msg);
+		//Histo.put(sender, msg);
+		
+		
 	}
 	
 	
-	
+public Hashtable<String, String> getMsg(){
+		return Histo;
+	}
 	
 	public void startTextChatSession() throws RemoteException, NotBoundException
 	{
@@ -64,7 +74,7 @@ public class Client implements ClientInterface, Serializable {
 			//chat = (ChatInterface) registry.lookup(serveur+"/Chat");
 			chat =(ChatInterface) registry.lookup(serveur);
 			System.out.println("USER ADD");
-			
+			Histo = new Hashtable<String, String>();
 			//chat.addUser(nom,this);
 			
 			
@@ -89,7 +99,9 @@ public class Client implements ClientInterface, Serializable {
 	
 	public void sendmessage(String msg){
 		try {
-			chat.send(nom, msg);
+			chat.send(this.nom, msg);
+			System.out.println(this.nom+" : "+msg);
+			Histo.put(this.nom, msg);
 			
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
@@ -120,7 +132,7 @@ public class Client implements ClientInterface, Serializable {
 	}
 	
 	/*
-	 * Lister les utilisateurs connectés
+	 * Lister les utilisateurs connectï¿½s
 	 */
 	public LinkedList getOnlineUsers(){
 		LinkedList onlineuser = null;
@@ -133,6 +145,10 @@ public class Client implements ClientInterface, Serializable {
 		
 		return onlineuser;
 	}
+	
+//	public String getMsg(){
+//		return chat.;
+//	} 
 	
 	
 }

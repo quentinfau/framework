@@ -8,8 +8,6 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -24,10 +22,14 @@ public class ChatImpl  extends UnicastRemoteObject implements ChatInterface,Seri
 	 */
 	private static final long serialVersionUID = 606137891279137844L;
 		private Hashtable<String, Client> users;
+		private Hashtable<String, String> Histo = new Hashtable<String,String>();
+		
+		
 		//private Enumeration<Client> OnlineUsers;
-	
+	//protected Hashtable<String, Client> users;
 	public ChatImpl() throws RemoteException {
-		users = new Hashtable<String, Client>();
+		users = new Hashtable<String,Client>();
+		Histo = new Hashtable<String,String>();
 	}
 
 	
@@ -43,18 +45,17 @@ public class ChatImpl  extends UnicastRemoteObject implements ChatInterface,Seri
 	
 	
 	public synchronized void send(String nom, String msg) {
-		
-		 //OnlineUsers=users.elements();
-		//System.out.println(users.elements().toString());
-		//while(OnlineUsers.hasMoreElements()){
-		Set<String> set=users.keySet();
+		Set<String> set = users.keySet();
 		Iterator<String> itr = set.iterator();
-		 String nomOnline;
-		 while(itr.hasNext()){
-			 nomOnline = itr.next();
-		 Client client = get(nomOnline);
+		  while(itr.hasNext()){
+		 //for (int i = 0; i < users.size(); i++) {
+		 //nomOnline = itr.next();
+			 //System.out.println(users.get(i).getName());
+		    Client client = users.get(itr.next());
 			client.receive(nom,msg);
+			Histo.put(nom, msg);
 			enregistrerEchange(nom,msg);
+			
 		}
 	}
 	
@@ -82,6 +83,14 @@ public class ChatImpl  extends UnicastRemoteObject implements ChatInterface,Seri
 			e.printStackTrace();
 		  }
 	}
+
+
+	public Hashtable<String, String> getMsg() {
+		return Histo;
+	}
+
+
+	
 	
 	
 	public LinkedList listUsers() {
